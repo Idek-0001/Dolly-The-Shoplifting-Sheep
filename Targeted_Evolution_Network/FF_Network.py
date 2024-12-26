@@ -70,27 +70,34 @@ class Network():
             weight_mutations = np.multiply(weight_mutate_amounts, weights_to_mutate)
             self.weights[current_layer][node] = [x + y for x,y in zip(self.weights[current_layer][node], weight_mutations)]
         
-        self.mutate(threshold, current_layer = current_layer + 1)
+        self.mutate(error_value, weight_fitness_threshold= weight_fitness_threshold, bias_fitness_threshold= bias_fitness_threshold, current_layer = current_layer + 1)
 
+def threshold_curve(value):
+    return value
 
-def determine_thresholds(network, max_network_fitness):
-    network_accuracy = network.fitness / max_network_fitness
+def determine_bias_threshold(network):
+    #network_accuracy = network.fitness / max_network_fitness
 
-    bias_max = max(network.bias_fitnesses)
-    bias_min = min(network.bias_fitnesses)
+    bias_max = np.mean(max(network.bias_fitnesses))
+    bias_min = np.mean(min(network.bias_fitnesses))
     bias_average = np.mean(network.bias_fitnesses)
 
     bias_threshold = bias_average * threshold_curve(bias_max - bias_min)
+    return bias_threshold
 
-    weight_max = max(network.weight_fitnesses)
-    weight_min = min(network.weight_fitnesses)
+def determine_weight_threshold(network):
+    #network_accuracy = network.fitness / max_network_fitness
+
+    weight_max = np.mean(max(network.weight_fitnesses))
+    weight_min = np.mean(min(network.weight_fitnesses))
     weight_average = np.mean(network.weight_fitnesses)
-    weight_threshold = weight_average # * threshold_curve(weight_max - weight_min)
+    weight_threshold = weight_average * threshold_curve(weight_max - weight_min)
 
-    return {
-        "Weight Threshold" : weight_threshold,
-        "Bias Threshold" : bias_threshold
-    }
+    return weight_threshold
 
 
 
+
+n = Network([2,2,2])
+
+n.mutate([1,0], weight_fitness_threshold= determine_weight_threshold(n), bias_fitness_threshold= determine_bias_threshold(n))
