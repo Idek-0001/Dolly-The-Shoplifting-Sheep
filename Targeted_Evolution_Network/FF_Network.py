@@ -37,13 +37,21 @@ class Network():
         impact_list = np.multiply(weights, value/total_sum)
         return impact_list
 
+    def sum_function(self, values):
+        if type(values) is list:
+            return sum(values)
+        return values
+
     def assign_impacts(self, values, current_layer):
         if (current_layer < 0): return          #   Base Case
 
-        bias_impacts = np.multiply(self.biases[current_layer], map(sum(),values)/sum(self.biases[current_layer]))
+        bias_impacts = np.multiply(self.biases[current_layer], np.array(list(map(lambda v: self.sum_function(v) ,values)))/sum(self.biases[current_layer]))
 
         for node, bias_impact in enumerate(bias_impacts):
-            self.weight_fitnesses = [x + y for x,y in zip(self.weight_fitnesses[current_layer][node], self.compute_impacts(bias_impact, self.weights[current_layer][node]))]
+            print(len(bias_impacts))
+            print(len(self.weight_fitnesses[current_layer]))
+            print(node)
+            self.weight_fitnesses[current_layer][node] = [x + y for x,y in zip(self.weight_fitnesses[current_layer][node], self.compute_weight_impacts(bias_impact, self.weights[current_layer][node]))]
         
         self.bias_fitnesses[current_layer] = [x + y for x,y in zip(self.bias_fitnesses, bias_impacts)]
 
@@ -57,13 +65,16 @@ class Network():
 
         #Mutate biases
         biases_to_mutate = deepcopy(self.bias_fitnesses[current_layer])
-        biases_to_mutate[current_layer][self.bias_fitnesses[current_layer] > bias_fitness_threshold] = 0
+        print(biases_to_mutate)
+
+        biases_to_mutate[biases_to_mutate > bias_fitness_threshold] = 0
         bias_mutate_amounts = np.random.uniform(low= -1.0 * self.MUTATE_MAGNITUDE, high= 1.0 * self.MUTATE_MAGNITUDE, size= (len(biases_to_mutate),))
         bias_mutations = np.multiply(bias_mutate_amounts, biases_to_mutate)
         self.biases[current_layer] = [x + y for x,y in zip(self.biases[current_layer], bias_mutations)]
 
         #Mutate weights
         for node in range(len(self.weights[current_layer])):
+            #mutate weights
             weights_to_mutate = deepcopy(self.weight_fitnesses[current_layer][node])
             weights_to_mutate [weights_to_mutate > weight_fitness_threshold] = 0
             weight_mutate_amounts = np.random.uniform(low= -1.0 * self.MUTATE_MAGNITUDE, high= 1.0 * self.MUTATE_MAGNITUDE, size= (len(weights_to_mutate),))
@@ -98,6 +109,6 @@ def determine_weight_threshold(network):
 
 
 
-n = Network([2,2,2])
+n = Network([1,3,1])
 
-n.mutate([1,0], weight_fitness_threshold= determine_weight_threshold(n), bias_fitness_threshold= determine_bias_threshold(n))
+n.mutate([1], weight_fitness_threshold= 1, bias_fitness_threshold= 1)
