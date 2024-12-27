@@ -90,19 +90,24 @@ def get_op_learningRate():
 
 
 def test_learning():
-    n = Network([16,13,16], learning_rate=0.5)
-    inputs = [0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+    n = Network([16,13,16], learning_rate=0.1)
+    inputs = [0,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1]
     legal_placements = np.array([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
     i = 0
-    while np.mean(np.square(legal_placements - n.outputs)) > 0.01 and i < 10000:
+    while np.mean(np.square(legal_placements - n.outputs)) > 0.01 and i < 100000:
         n.propogate(inputs)
         n.backpropogate(legal_placements - n.outputs, n.hidden_layers)
 
         if (i % 1000 == 0):
-            print("ERROR: " + str(np.mean(np.square(legal_placements - n.outputs))))
-            #print(n.weights[0])
-        
+            #print( str(i) + ", ERROR: " + str(np.mean(np.abs(legal_placements - n.outputs))))
+            #print(legal_placements - n.outputs)
+            #print(np.where(n.outputs == max(n.outputs)))
+            print(n.outputs)
+            #print(str(n.outputs[0]) + "  " +  str(n.outputs[1]))
+            #print(n.weights[1][1])
+            #print(i)
         i += 1
+        #n.learning_rate = np.sqrt(i)
 
     
 
